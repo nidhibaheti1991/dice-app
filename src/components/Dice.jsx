@@ -13,32 +13,31 @@ const DiceFace = ({ value }) => {
 };
 
 const Dice = forwardRef(({ value, isRolling, isThrowing }, ref) => {
-  // Calculate rotation to show the correct face on top
-  // Animation ends at rotateX(-630deg) rotateY(360deg) rotateZ(0deg)
-  // -630 = -720 + 90, so top face (face-3) is tilted 90deg toward viewer
-  // To show different faces, we adjust rotations
-  const getRotation = (val) => {
-    const rotations = {
-      // Face 1 (front face): rotate so front tilts up
-      1: 'rotateX(-540deg) rotateY(360deg) rotateZ(0deg)',
-      // Face 2 (right face): rotate Y to bring right side to front, then tilt
-      2: 'rotateX(-630deg) rotateY(270deg) rotateZ(0deg)',
-      // Face 3 (top face): this is the base position
-      3: 'rotateX(-630deg) rotateY(360deg) rotateZ(0deg)',
-      // Face 4 (bottom face): flip 180 on X
-      4: 'rotateX(-450deg) rotateY(360deg) rotateZ(0deg)',
-      // Face 5 (left face): rotate Y to bring left side to front
-      5: 'rotateX(-630deg) rotateY(450deg) rotateZ(0deg)',
-      // Face 6 (back face): rotate to bring back to front
-      6: 'rotateX(-720deg) rotateY(360deg) rotateZ(0deg)',
-    };
-    return rotations[val] || rotations[1];
+  // Rotation values for each face (X and Y degrees)
+  const rotationValues = {
+    1: { x: -540, y: 360 },
+    2: { x: -630, y: 270 },
+    3: { x: -630, y: 360 },
+    4: { x: -450, y: 360 },
+    5: { x: -630, y: 450 },
+    6: { x: -720, y: 360 },
   };
+
+  const rotation = rotationValues[value] || rotationValues[1];
 
   const getShadowClass = () => {
     if (isThrowing) return 'dice-shadow animating';
     if (!isRolling) return 'dice-shadow visible';
     return 'dice-shadow';
+  };
+
+  // Pass target rotation as CSS custom properties so animation ends at correct position
+  const diceStyle = {
+    '--end-x': `${rotation.x}deg`,
+    '--end-y': `${rotation.y}deg`,
+    transform: !isRolling
+      ? `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(0deg)`
+      : undefined,
   };
 
   return (
@@ -47,7 +46,7 @@ const Dice = forwardRef(({ value, isRolling, isThrowing }, ref) => {
         <div
           ref={ref}
           className={`dice ${isRolling ? 'rolling' : ''}`}
-          style={!isRolling ? { transform: getRotation(value) } : undefined}
+          style={diceStyle}
         >
           <DiceFace value={1} />
           <DiceFace value={2} />
