@@ -1,0 +1,397 @@
+.app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+/* Video Background */
+.video-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--overlay-bg);
+  z-index: -1;
+  transition: background 0.5s ease;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: var(--primary-bg);
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px var(--shadow-color);
+  z-index: 100;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.08);
+  background: var(--button-hover);
+}
+
+.theme-toggle svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--primary-text);
+  transition: fill 0.3s ease;
+}
+
+/* Main Content - positioned for coffee table */
+.content {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  z-index: 10;
+}
+
+/* Dice landing area - positioned on the coffee table */
+.dice-area {
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+/* 3D Dice Scene - angled view to see top face on table */
+.dice-scene {
+  width: 70px;
+  height: 70px;
+  perspective: 600px;
+  perspective-origin: 50% 150%;
+}
+
+/* Dice wrapper for throw animation */
+.dice-wrapper {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.dice-wrapper.throwing {
+  animation: throwDice 2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes throwDice {
+  0% {
+    transform: translateY(250px) translateX(-80px) translateZ(-50px) scale(0.8);
+    opacity: 0.7;
+  }
+  8% {
+    opacity: 1;
+  }
+  /* Arc upward - being thrown */
+  25% {
+    transform: translateY(-60px) translateX(-20px) translateZ(80px) scale(1.05);
+  }
+  /* Peak of throw */
+  40% {
+    transform: translateY(-80px) translateX(10px) translateZ(60px) scale(1);
+  }
+  /* Coming down */
+  60% {
+    transform: translateY(5px) translateX(15px) translateZ(20px) scale(1);
+  }
+  /* First soft bounce */
+  72% {
+    transform: translateY(-12px) translateX(12px) translateZ(10px) scale(1);
+  }
+  /* Settle down */
+  84% {
+    transform: translateY(3px) translateX(8px) translateZ(5px) scale(1);
+  }
+  /* Tiny final settle */
+  92% {
+    transform: translateY(-3px) translateX(5px) translateZ(2px) scale(1);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px) translateZ(0px) scale(1);
+  }
+}
+
+/* 3D Dice Cube */
+.dice {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.dice.rolling {
+  animation: roll3d 2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes roll3d {
+  0% {
+    transform: rotateX(-60deg) rotateY(-20deg) rotateZ(10deg);
+  }
+  /* Initial toss - tumbling in the air */
+  20% {
+    transform: rotateX(-200deg) rotateY(120deg) rotateZ(80deg);
+  }
+  /* Mid-air tumble */
+  40% {
+    transform: rotateX(-380deg) rotateY(280deg) rotateZ(150deg);
+  }
+  /* Coming down toward table */
+  55% {
+    transform: rotateX(-480deg) rotateY(380deg) rotateZ(200deg);
+  }
+  /* First landing - settling toward flat */
+  70% {
+    transform: rotateX(-560deg) rotateY(350deg) rotateZ(10deg);
+  }
+  /* Small wobble */
+  85% {
+    transform: rotateX(-625deg) rotateY(365deg) rotateZ(-3deg);
+  }
+  /* Final settle - tilted to show top face */
+  100% {
+    transform: rotateX(-630deg) rotateY(360deg) rotateZ(0deg);
+  }
+}
+
+/* Dice Face - 3D realistic styling (warm ceramic/coffee mug color) */
+.dice-face {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(145deg, #d4c4b0 0%, #c9b8a1 40%, #bfae96 100%);
+  border-radius: 10px;
+  display: grid;
+  padding: 10px;
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  backface-visibility: visible;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dice face positions - proper 3D cube */
+.dice-face.face-1 { transform: rotateY(0deg) translateZ(35px); }
+.dice-face.face-6 { transform: rotateY(180deg) translateZ(35px); }
+.dice-face.face-2 { transform: rotateY(90deg) translateZ(35px); }
+.dice-face.face-5 { transform: rotateY(-90deg) translateZ(35px); }
+.dice-face.face-3 { transform: rotateX(90deg) translateZ(35px); }
+.dice-face.face-4 { transform: rotateX(-90deg) translateZ(35px); }
+
+/* Dot layouts */
+.face-1 { grid-template: 1fr / 1fr; place-items: center; }
+.face-2 { grid-template: 1fr 1fr / 1fr; }
+.face-3 { grid-template: 1fr 1fr 1fr / 1fr; }
+.face-4 { grid-template: 1fr 1fr / 1fr 1fr; }
+.face-5 { grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr; }
+.face-6 { grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+
+/* Dots - realistic indented pips (darker for contrast on warm dice) */
+.dot {
+  width: 11px;
+  height: 11px;
+  background: radial-gradient(circle at 30% 30%, #5c4a3a 0%, #3d2e22 60%, #2a1f17 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.05),
+    0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Face 2 - diagonal */
+.face-2 .dot:nth-child(1) { justify-self: end; align-self: start; }
+.face-2 .dot:nth-child(2) { justify-self: start; align-self: end; }
+
+/* Face 3 - diagonal */
+.face-3 .dot:nth-child(1) { justify-self: end; align-self: start; }
+.face-3 .dot:nth-child(2) { justify-self: center; align-self: center; }
+.face-3 .dot:nth-child(3) { justify-self: start; align-self: end; }
+
+/* Face 4 - corners */
+.face-4 .dot { justify-self: center; align-self: center; }
+
+/* Face 5 - X pattern */
+.face-5 .dot:nth-child(1) { grid-area: 1 / 1; justify-self: center; align-self: center; }
+.face-5 .dot:nth-child(2) { grid-area: 1 / 3; justify-self: center; align-self: center; }
+.face-5 .dot:nth-child(3) { grid-area: 2 / 2; justify-self: center; align-self: center; }
+.face-5 .dot:nth-child(4) { grid-area: 3 / 1; justify-self: center; align-self: center; }
+.face-5 .dot:nth-child(5) { grid-area: 3 / 3; justify-self: center; align-self: center; }
+
+/* Face 6 - two columns */
+.face-6 .dot { justify-self: center; align-self: center; }
+
+/* Dice shadow on table */
+.dice-shadow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%) scale(1);
+  width: 80px;
+  height: 20px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 40%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(6px);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.dice-shadow.visible {
+  opacity: 1;
+}
+
+.dice-shadow.animating {
+  animation: shadowFollow 2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes shadowFollow {
+  0% {
+    opacity: 0;
+    transform: translateX(-130%) translateY(-200px) scale(0.2);
+    filter: blur(15px);
+  }
+  25% {
+    opacity: 0.1;
+    transform: translateX(-70%) translateY(-50px) scale(0.4);
+    filter: blur(12px);
+  }
+  40% {
+    opacity: 0.15;
+    transform: translateX(-40%) translateY(-30px) scale(0.5);
+    filter: blur(10px);
+  }
+  /* Landing - shadow expands on impact */
+  60% {
+    opacity: 0.7;
+    transform: translateX(-45%) translateY(0px) scale(1.3);
+    filter: blur(4px);
+  }
+  /* First bounce - shadow shrinks */
+  72% {
+    opacity: 0.4;
+    transform: translateX(-48%) translateY(-5px) scale(0.9);
+    filter: blur(8px);
+  }
+  /* Second landing */
+  84% {
+    opacity: 0.8;
+    transform: translateX(-49%) translateY(0px) scale(1.1);
+    filter: blur(5px);
+  }
+  /* Final settle */
+  92% {
+    opacity: 0.6;
+    transform: translateX(-50%) translateY(-2px) scale(0.95);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0px) scale(1);
+    filter: blur(6px);
+  }
+}
+
+/* Roll Button */
+.roll-button {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  padding: 18px 48px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px var(--shadow-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.roll-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.roll-button:hover {
+  transform: translateY(-3px);
+  background: var(--button-hover);
+  box-shadow: 0 12px 40px var(--shadow-color);
+}
+
+.roll-button:hover::before {
+  left: 100%;
+}
+
+.roll-button:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.roll-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .dice,
+  .dice-wrapper,
+  .roll-button,
+  .theme-toggle {
+    transition: none;
+  }
+
+  .dice.rolling,
+  .dice-wrapper.throwing,
+  .dice-shadow.animating {
+    animation: none;
+  }
+
+  .roll-button::before {
+    display: none;
+  }
+}
