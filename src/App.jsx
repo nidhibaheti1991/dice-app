@@ -2,6 +2,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import Dice from './components/Dice';
 import Coin from './components/Coin';
 import ThemeToggle from './components/ThemeToggle';
+import PremiumModal from './components/PremiumModal';
+import { usePremium } from './contexts/PremiumContext';
+import { useSound } from './hooks/useSound';
 import './App.css';
 
 function App() {
@@ -11,10 +14,19 @@ function App() {
   const [isRolling, setIsRolling] = useState(false);
   const [isThrowing, setIsThrowing] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isSoundOn, setIsSoundOn] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const diceRef = useRef(null);
   const coinRef = useRef(null);
   const videoRef = useRef(null);
+
+  const {
+    hasPurchased,
+    soundEnabled,
+    toggleSound: togglePremiumSound,
+    ambientEnabled,
+    toggleAmbient,
+  } = usePremium();
+  const { playDiceRoll, playCoinFlip } = useSound();
 
   // Detect system preference on mount
   useEffect(() => {
@@ -27,8 +39,19 @@ function App() {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
+  // Sync video muted state with ambient sound setting
+  useEffect(() => {
+    if (videoRef.current) {
+      const shouldPlay = ambientEnabled && hasPurchased('ambientSound');
+      videoRef.current.muted = !shouldPlay;
+    }
+  }, [ambientEnabled, hasPurchased]);
+
   const rollDice = useCallback(() => {
     if (isRolling || isThrowing) return;
+
+    // Play sound if enabled
+    playDiceRoll();
 
     // Generate random result FIRST so animation can target it
     const result = Math.floor(Math.random() * 6) + 1;
@@ -43,10 +66,13 @@ function App() {
       setIsRolling(false);
       setIsThrowing(false);
     }, 2000);
-  }, [isRolling, isThrowing]);
+  }, [isRolling, isThrowing, playDiceRoll]);
 
   const flipCoin = useCallback(() => {
     if (isRolling || isThrowing) return;
+
+    // Play sound if enabled
+    playCoinFlip();
 
     // Generate random result FIRST so animation can target it
     const result = Math.random() < 0.5 ? 'heads' : 'tails';
@@ -61,7 +87,7 @@ function App() {
       setIsRolling(false);
       setIsThrowing(false);
     }, 1800);
-  }, [isRolling, isThrowing]);
+  }, [isRolling, isThrowing, playCoinFlip]);
 
   const handleAction = useCallback(() => {
     if (mode === 'dice') {
@@ -75,14 +101,6 @@ function App() {
     setIsDarkMode((prev) => !prev);
   }, []);
 
-  const toggleSound = useCallback(() => {
-    if (videoRef.current) {
-      const newSoundState = !isSoundOn;
-      videoRef.current.muted = !newSoundState;
-      setIsSoundOn(newSoundState);
-    }
-  }, [isSoundOn]);
-
   const switchMode = useCallback((newMode) => {
     if (!isRolling && !isThrowing) {
       setMode(newMode);
@@ -94,6 +112,22 @@ function App() {
       return mode === 'dice' ? 'Rolling...' : 'Flipping...';
     }
     return mode === 'dice' ? 'Roll the Dice' : 'Toss the Coin';
+  };
+
+  const handleSoundClick = () => {
+    if (hasPurchased('soundEffects')) {
+      togglePremiumSound();
+    } else {
+      setShowPremiumModal(true);
+    }
+  };
+
+  const handleAmbientClick = () => {
+    if (hasPurchased('ambientSound')) {
+      toggleAmbient();
+    } else {
+      setShowPremiumModal(true);
+    }
   };
 
   return (
@@ -114,22 +148,46 @@ function App() {
       {/* Theme Toggle */}
       <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
 
-      {/* Sound Toggle */}
-      <button
-        className="sound-toggle"
-        onClick={toggleSound}
-        aria-label={isSoundOn ? 'Mute fire sounds' : 'Unmute fire sounds'}
-      >
-        {isSoundOn ? (
+      {/* Premium Feature Toggles */}
+      <div className="premium-toggles">
+        {/* Dice/Coin Sound Effects Toggle */}
+        <button
+          className={`premium-toggle ${soundEnabled && hasPurchased('soundEffects') ? 'active' : ''} ${!hasPurchased('soundEffects') ? 'locked' : ''}`}
+          onClick={handleSoundClick}
+          aria-label={hasPurchased('soundEffects') ? 'Toggle dice sounds' : 'Unlock dice sounds'}
+          title={hasPurchased('soundEffects') ? 'Dice Sounds' : 'Unlock Dice Sounds'}
+        >
+          {!hasPurchased('soundEffects') && <span className="lock-badge">PRO</span>}
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
           </svg>
-        ) : (
+        </button>
+
+        {/* Ambient Fire Sound Toggle */}
+        <button
+          className={`premium-toggle ${ambientEnabled && hasPurchased('ambientSound') ? 'active' : ''} ${!hasPurchased('ambientSound') ? 'locked' : ''}`}
+          onClick={handleAmbientClick}
+          aria-label={hasPurchased('ambientSound') ? 'Toggle fire sounds' : 'Unlock fire sounds'}
+          title={hasPurchased('ambientSound') ? 'Ambient Fire' : 'Unlock Ambient Fire'}
+        >
+          {!hasPurchased('ambientSound') && <span className="lock-badge">PRO</span>}
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+            <path d="M12 22c3.31 0 6-2.69 6-6 0-2.5-1.5-4.5-3-6-1.5 1.5-3 3.5-3 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-1.5.5-2.5 1-3.5.5-1 1-2 1-3.5 0-2.5-1.5-4.5-3-6-1.5 1.5-3 3.5-3 6 0 5.52 4.48 10 10 10z"/>
           </svg>
-        )}
-      </button>
+        </button>
+
+        {/* Shop Button */}
+        <button
+          className="premium-toggle shop-button"
+          onClick={() => setShowPremiumModal(true)}
+          aria-label="Open premium shop"
+          title="Premium Upgrades"
+        >
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm6 9.09c0 4-2.55 7.7-6 8.83-3.45-1.13-6-4.82-6-8.83v-4.7l6-2.25 6 2.25v4.7zM9.5 12L8 13.5l3 3 5-5-1.5-1.5-3.5 3.5-1.5-1.5z"/>
+          </svg>
+        </button>
+      </div>
 
       {/* Mode Toggle */}
       <div className="mode-toggle">
@@ -178,6 +236,12 @@ function App() {
           {getButtonText()}
         </button>
       </main>
+
+      {/* Premium Modal */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </div>
   );
 }
