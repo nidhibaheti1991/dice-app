@@ -10,17 +10,33 @@ function App() {
   const [coinValue, setCoinValue] = useState('heads');
   const [isRolling, setIsRolling] = useState(false);
   const [isThrowing, setIsThrowing] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true); // Sound on by default
+  const [soundEnabled, setSoundEnabled] = useState(false); // Sound off by default (browser autoplay policy)
   const diceRef = useRef(null);
   const coinRef = useRef(null);
   const videoRef = useRef(null);
 
   const { playDiceRoll, playCoinFlip } = useSound(soundEnabled);
 
+  // Ensure video plays on mount (muted autoplay is allowed)
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        // Autoplay failed, video will remain paused
+      });
+    }
+  }, []);
+
   // Sync video muted state with sound setting
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = !soundEnabled;
+      // Ensure video is playing (may have been paused by browser)
+      if (soundEnabled) {
+        videoRef.current.play().catch(() => {
+          // Autoplay was prevented, keep video muted
+          videoRef.current.muted = true;
+        });
+      }
     }
   }, [soundEnabled]);
 
