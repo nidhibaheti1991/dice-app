@@ -607,7 +607,7 @@
 /* Sound Toggle Button */
 .sound-toggle {
   position: absolute;
-  top: 84px;
+  top: 24px;
   left: 24px;
   z-index: 100;
   background: var(--primary-bg);
