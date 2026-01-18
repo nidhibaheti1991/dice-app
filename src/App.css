@@ -31,38 +31,6 @@
   transition: background 0.5s ease;
 }
 
-/* Theme Toggle */
-.theme-toggle {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  background: var(--primary-bg);
-  border: none;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.4s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px var(--shadow-color);
-  z-index: 100;
-}
-
-.theme-toggle:hover {
-  transform: scale(1.08);
-  background: var(--button-hover);
-}
-
-.theme-toggle svg {
-  width: 22px;
-  height: 22px;
-  fill: var(--primary-text);
-  transition: fill 0.3s ease;
-}
-
 /* Mode Toggle */
 .mode-toggle {
   position: absolute;
@@ -105,6 +73,8 @@
 
 .mode-button:disabled {
   cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(0.3);
 }
 
 /* Main Content - positioned for coffee table */
@@ -626,26 +596,20 @@
 }
 
 .roll-button:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  filter: grayscale(0.3);
 }
 
 /* ==================== PREMIUM FEATURES ==================== */
 
-/* Premium Toggle Buttons */
-.premium-toggles {
+/* Sound Toggle Button */
+.sound-toggle {
   position: absolute;
   top: 84px;
   left: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   z-index: 100;
-}
-
-.premium-toggle {
-  position: relative;
   background: var(--primary-bg);
   border: none;
   border-radius: 50%;
@@ -660,12 +624,12 @@
   box-shadow: 0 4px 20px var(--shadow-color);
 }
 
-.premium-toggle:hover {
+.sound-toggle:hover {
   transform: scale(1.08);
   background: var(--button-hover);
 }
 
-.premium-toggle svg {
+.sound-toggle svg {
   width: 20px;
   height: 20px;
   fill: var(--primary-text);
@@ -673,39 +637,9 @@
   transition: all 0.3s ease;
 }
 
-.premium-toggle.active svg {
+.sound-toggle.active svg {
   opacity: 1;
   fill: #ffd700;
-}
-
-.premium-toggle.locked {
-  opacity: 0.7;
-}
-
-.premium-toggle.locked:hover {
-  opacity: 1;
-}
-
-.premium-toggle.shop-button svg {
-  fill: #ffd700;
-  opacity: 0.9;
-}
-
-.premium-toggle.shop-button:hover svg {
-  opacity: 1;
-}
-
-.lock-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: linear-gradient(135deg, #ffd700, #ffaa00);
-  color: #1a1a1a;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 6px;
-  letter-spacing: 0.5px;
 }
 
 /* Animations for reduced motion */
@@ -715,8 +649,8 @@
   .coin,
   .coin-wrapper,
   .roll-button,
-  .theme-toggle,
-  .mode-button {
+  .mode-button,
+  .sound-toggle {
     transition: none;
   }
 
@@ -731,5 +665,10 @@
 
   .roll-button::before {
     display: none;
+  }
+
+  /* Pause video for users who prefer reduced motion */
+  .video-background {
+    animation-play-state: paused !important;
   }
 }

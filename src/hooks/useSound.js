@@ -1,5 +1,4 @@
 import { useCallback, useRef, useEffect } from 'react';
-import { usePremium } from '../contexts/PremiumContext';
 
 // Create sound effects using Web Audio API (no external files needed)
 function createAudioContext() {
@@ -60,21 +59,15 @@ function playChime(audioContext, baseFreq, duration, volume = 0.12, delay = 0) {
   osc2.stop(startTime + duration);
 }
 
-export function useSound() {
-  const { soundEnabled, purchases } = usePremium();
+export function useSound(soundEnabled) {
   const audioContextRef = useRef(null);
 
-  // Use refs to always have current values in callbacks
+  // Use ref to always have current value in callbacks
   const soundEnabledRef = useRef(soundEnabled);
-  const purchasesRef = useRef(purchases);
 
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
-
-  useEffect(() => {
-    purchasesRef.current = purchases;
-  }, [purchases]);
 
   // Initialize audio context on first user interaction
   const ensureAudioContext = useCallback(() => {
@@ -98,10 +91,7 @@ export function useSound() {
   }, []);
 
   const playDiceRoll = useCallback(() => {
-    const isEnabled = soundEnabledRef.current;
-    const hasSoundPurchased = purchasesRef.current?.soundEffects === true;
-
-    if (!isEnabled || !hasSoundPurchased) return;
+    if (!soundEnabledRef.current) return;
 
     const ctx = ensureAudioContext();
 
@@ -118,10 +108,7 @@ export function useSound() {
   }, [ensureAudioContext]);
 
   const playCoinFlip = useCallback(() => {
-    const isEnabled = soundEnabledRef.current;
-    const hasSoundPurchased = purchasesRef.current?.soundEffects === true;
-
-    if (!isEnabled || !hasSoundPurchased) return;
+    if (!soundEnabledRef.current) return;
 
     const ctx = ensureAudioContext();
 
@@ -139,6 +126,6 @@ export function useSound() {
   return {
     playDiceRoll,
     playCoinFlip,
-    isEnabled: soundEnabled && purchases?.soundEffects === true,
+    isEnabled: soundEnabled,
   };
 }
